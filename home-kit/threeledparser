@@ -1,0 +1,31 @@
+
+int ledpred = 9;
+int ledpgreen = 10;
+int ledpblue = 11;
+
+void setup() 
+{
+  Serial.begin(9600);
+pinMode(ledpred,OUTPUT);
+pinMode(ledpgreen,OUTPUT);
+pinMode(ledpblue,OUTPUT);
+}
+
+void loop() {
+  if (Serial.available()>0)
+  {
+    int i = 0;
+    String val =Serial.readStringUntil('\n');
+    String vals[3];
+    while(val.indexOf(',')>0)
+    {
+      vals[i] = val.substring(0,val.indexOf(','));
+      val = val.substring(val.indexOf(',')+1);
+      i++;
+    }
+    vals[i]=val;
+    analogWrite(ledpred,vals[0].toInt());
+    analogWrite(ledpgreen,vals[1].toInt());
+    analogWrite(ledpblue,vals[2].toInt());
+  }
+}

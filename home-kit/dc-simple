@@ -1,0 +1,37 @@
+const int ENP = 2;
+const int M0_PHASE = 4;
+const int M0_PWM = 5;
+
+void setup() 
+{
+  Serial.begin(9600);
+  //SETUP PINS
+  digitalWrite(M0_PHASE, HIGH);
+  digitalWrite(ENP, LOW);
+  pinMode(M0_PWM, OUTPUT);
+  pinMode(M0_PHASE, OUTPUT);
+  pinMode(ENP, OUTPUT);
+}
+void loop()
+{
+  int POTENTIOMETER = analogRead(A0);
+  int PMW = map(abs(POTENTIOMETER - 512), 0, 512, 0, 255);
+  
+  if(POTENTIOMETER < 512) 
+  {  
+    //CCW LEFT SIDE
+    digitalWrite(M0_PHASE, LOW);
+    analogWrite(M0_PWM, PMW);
+  } 
+  else if(POTENTIOMETER > 512) 
+  {  
+    //CW RIGHT SIDE
+    digitalWrite(M0_PHASE, HIGH);
+    analogWrite(M0_PWM, 512-PMW);
+  } 
+  else 
+  {  
+   //Stop MIDDLE
+    analogWrite(M0_PWM, 0);
+  }
+}

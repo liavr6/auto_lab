@@ -1,0 +1,17 @@
+
+int ledp =9;
+void setup() {
+  Serial.begin(9600);
+pinMode(ledp,OUTPUT);
+}
+
+void loop() {
+  if (Serial.available())
+  {
+    int val =Serial.readStringUntil('\n').toInt();
+    if(val>=0 && val<= 255)
+    {
+      analogWrite(ledp,val);
+    }
+  }
+}

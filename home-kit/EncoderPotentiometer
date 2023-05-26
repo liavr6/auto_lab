@@ -1,0 +1,142 @@
+//Encoder Example
+
+
+// Define Pins
+
+#define ENCODER_PINA 2
+
+#define ENCODER_PINB 3
+
+const int M0_PHASE = 4;
+const int M0_PWM = 5;
+const int ENP = 6;
+
+// encoder variables
+  unsigned long prev =0;
+
+volatile int encoderCounts = 0;
+float revs = 0 ;
+float rpm = 0;
+const int gear = 550; // changeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+// Encoder ISR functions - Interupt Service Routine
+
+void encoderA();
+
+void encoderB();
+
+
+void setup() {
+
+  // initialize serial communication at 115200 bits per second:
+
+  Serial.begin (115200);
+
+ 
+
+  // initialize encoder, attache ISR functions
+
+  pinMode(ENCODER_PINA, INPUT);
+
+  pinMode(ENCODER_PINB, INPUT);
+
+   // Attached interrupt to encoder pins
+
+  attachInterrupt(digitalPinToInterrupt(ENCODER_PINA), encoderA, CHANGE);
+
+  attachInterrupt(digitalPinToInterrupt(ENCODER_PINB), encoderB, CHANGE);
+
+
+  Serial.print("Encoder_Value");
+
+}
+
+
+void loop() {
+
+  // print encoder position
+    int POTENTIOMETER = analogRead(A0);
+  int PMW = map(abs(POTENTIOMETER - 512), 0, 512, 0, 255);
+
+    if(POTENTIOMETER < 500) 
+  {  
+    //CCW LEFT SIDE
+    digitalWrite(M0_PHASE, LOW);
+    digitalWrite(ENP, LOW);
+    analogWrite(M0_PWM, PMW);
+  } 
+  else if(POTENTIOMETER > 512) 
+  {  
+    //CW RIGHT SIDE
+    digitalWrite(M0_PHASE, HIGH);
+    digitalWrite(ENP, LOW);
+    analogWrite(M0_PWM, 512-PMW);
+  } 
+  else 
+  {  
+   //Stop MIDDLE
+    digitalWrite(M0_PHASE, LOW);
+    digitalWrite(ENP, HIGH);
+    analogWrite(M0_PWM, 0);
+  }
+  
+
+  unsigned long curr = millis();
+  unsigned long delta = curr - prev;
+
+  float counts = encoderCounts;
+  encoderCounts = 0;
+  float revs = counts / gear; 
+  rpm = revs * (60*1000) / delta;
+  Serial.println(rpm);
+  prev = curr;
+  delay(100);
+   }
+
+
+
+// EncoderA ISR
+
+void encoderA() {
+
+  // look for a low-to-high on channel B
+
+  if (digitalRead(ENCODER_PINA) == HIGH) {
+
+    // check channel A to see which way encoder is turning
+
+    digitalRead(ENCODER_PINB) ? encoderCounts++ : encoderCounts--;    
+
+  }else{
+
+    // check channel A to see which way encoder is turning
+
+    digitalRead(ENCODER_PINB) ? encoderCounts-- : encoderCounts++;
+
+  }
+
+} // End EncoderA ISR
+
+
+// EncoderB ISR
+
+void encoderB() {
+
+  // look for a low-to-high on channel B
+
+  if (digitalRead(ENCODER_PINB) == HIGH) {
+
+    // check channel A to see which way encoder is turning
+
+    digitalRead(ENCODER_PINA) ? encoderCounts-- : encoderCounts++;    
+
+  }else{
+
+    // check channel A to see which way encoder is turning
+
+    digitalRead(ENCODER_PINA) ? encoderCounts++ : encoderCounts--;
+
+  }
+
+} // End EncoderB ISR
